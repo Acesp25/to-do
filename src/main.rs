@@ -1,10 +1,20 @@
 use chrono::NaiveDateTime;
-use crate::event::{Event, Priority, Reoccurance};
+use crate::backend::classes::planner::Planner;
+use crate::backend::classes::event::Event;
+use crate::backend::enums::reoccurance::Reoccurance;
+use crate::backend::enums::priority::Priority;
+
+mod backend {
+    pub mod classes;
+    pub mod enums;
+}
+mod ui;
 
 fn main() {
     let dummy_time = NaiveDateTime::from_timestamp(1_600_000_000, 0);
 
     let mut e1 = Event::new(
+        0,
         "Test Event".to_string(),
         dummy_time,
         dummy_time,

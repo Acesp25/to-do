@@ -1,5 +1,5 @@
-use crate::event::Event;
 use chrono::NaiveDateTime;
+use crate::backend::classes::event::Event;
 
 pub struct Planner {
     name: String,
@@ -26,8 +26,8 @@ impl Planner {
 
     pub fn delete_event(&mut self, event_id: usize) -> Option<Event> {
         if event_id < self.events.len() {
-            Some(self.events.remove(event_id));
             self.event_count -= 1;
+            Some(self.events.remove(event_id))
         } else {
             println!("Invalid event id {}.", event_id);
             None
@@ -61,7 +61,7 @@ impl Planner {
         if self.events.is_empty() {
             println!("No events schedued!");
         } else {
-            for (id,event) in self.events.iter().enumerate() {
+            for (_id,event) in self.events.iter().enumerate() {
                 event.display();
             }
         }

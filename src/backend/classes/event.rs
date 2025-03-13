@@ -1,4 +1,6 @@
 use chrono::NaiveDateTime;
+use crate::backend::enums::reoccurance::Reoccurance;
+use crate::backend::enums::priority::Priority;
 
 #[derive(Debug, Clone)]
 pub struct Event {
@@ -25,6 +27,7 @@ impl Event {
         completed: bool,
     ) -> Self {
         Self {
+            id,
             name,
             start_time,
             end_time,
@@ -49,7 +52,7 @@ impl Event {
     }
 
     // Getters
-    pub fn get_id(&self) -> usize {
+    pub fn get_id(&self) -> &usize {
         &self.id
     }
     pub fn get_name(&self) -> &String {
