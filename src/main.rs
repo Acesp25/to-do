@@ -1,7 +1,6 @@
 use chrono::NaiveDateTime;
 use crate::event::{Event, Priority, Reoccurance};
 
-mod event;
 fn main() {
     let dummy_time = NaiveDateTime::from_timestamp(1_600_000_000, 0);
 

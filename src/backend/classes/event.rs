@@ -1,23 +1,6 @@
 use chrono::NaiveDateTime;
 
 #[derive(Debug, Clone)]
-pub enum Priority {
-    High,
-    Medium,
-    Low,
-}
-
-#[derive(Debug, Clone)]
-pub enum Reoccurance {
-    Yearly,
-    Monthly,
-    Fornite,
-    Weekly,
-    Daily,
-    None,
-}
-
-#[derive(Debug, Clone)]
 pub struct Event {
     name: String,
     start_time: NaiveDateTime,

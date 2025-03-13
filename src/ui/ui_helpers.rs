@@ -11,7 +11,9 @@ pub fn create_event() {
     // add implementation later
 }
 
-pub fn adjust_menu() {
+pub fn adjust_menu(planner: Planner) {
     println!("  Select an event to edit! (enter eventID)");
+
     
+
 }
