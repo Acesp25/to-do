@@ -1,5 +1,7 @@
 use chrono::NaiveDateTime;
 use crate::backend::classes::event::Event;
+use crate::backend::enums::priority::Priority;
+use crate::backend::enums::reoccurance::Reoccurance;
 
 pub struct Planner {
     name: String,
@@ -39,8 +41,8 @@ impl Planner {
         name: String,
         start_time: NaiveDateTime,
         end_time: NaiveDateTime,
-        priority: crate::event::Priority,
-        reoccurance: crate::event::Reoccurance,
+        priority: Priority,
+        reoccurance: Reoccurance,
         note: String,
         completed: bool,
     ) {

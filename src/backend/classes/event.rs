@@ -41,6 +41,7 @@ impl Event {
     // Helpers
     pub fn display(&self) {
         println!(" __________________________________________");
+        println!("| Event ID: {:<24} |", self.id);
         println!("| Event: {:<30} |", self.name);
         println!("| Start Time: {:<24} |", self.start_time);
         println!("| End Time: {:<24} |", self.end_time);
