@@ -1,11 +1,14 @@
 use std::io::{self, Write};
-use crate::backend::classes::planner::Planner;
-use crate::backend::classes::event::Event;
-use crate::backend::enums::{Reoccurance, Priority};
 use chrono::NaiveDateTime;
 
-pub fn display_menu() {
+use crate::backend::classes::planner::Planner;
+use crate::backend::enums::reoccurance::Reoccurance;
+use crate::backend::enums::priority::Priority;
+use crate::backend::classes::event::Event;
+
+pub fn display_menu(current_date_time: NaiveDateTime) {
     println!("  Rust To-Do Planner!");
+    println!(" Current date-time: {}", current_date_time);
     println!("      1. Display today's plans");
     println!("      2. Create an event");
     println!("      3. Adjust an event");
@@ -41,16 +44,14 @@ pub fn get_choice() -> Option<usize> {
     }
 }
 
-fn id_input() -> Option<usize>{
+fn id_input() -> Option<usize> {
     print!("> ");
     io::stdout().flush().expect("Failed to flush stdout");
-
     let mut input = String::new();
     if let Err(e) = io::stdin().read_line(&mut input) {
         println!("Error reading input: {}", e);
-        return;
+        return None;
     }
-
     match input.trim().parse::<usize>() {
         Ok(id) => Some(id),
         Err(_) => {
@@ -60,7 +61,7 @@ fn id_input() -> Option<usize>{
     }
 }
 
-pub fn create_event(planner: &mut Planner) {
+pub fn event_creater(planner: &mut Planner) {
     // Get event name
     print!("Enter event name: ");
     io::stdout().flush().expect("Failed to flush stdout");
@@ -179,22 +180,25 @@ pub fn create_event(planner: &mut Planner) {
         _ => false,
     };
 
-    // Construct the new event and add it to the planner
-    let new_event = Event::new(name, start_time, end_time, priority, reoccurance, note, completed);
-    planner.add_event(new_event);
+    // Let the planner assign the id automatically, using its create_event method.
+    planner.create_event(name, start_time, end_time, priority, reoccurance, note, completed);
     println!("Event created successfully and added to the planner.");
 }
 
-pub fn adjust_event(planner: Planner) {
-    println!("  Select an event to edit! (enter eventID)");
-    planner.list_events(planner);
+pub fn adjust_event(planner: &mut Planner) {
+    println!("Select an event to edit! (enter eventID)");
+    planner.list_events(); // call without passing planner
 
-    let event_id = id_input();
+    // Unwrap the option from id_input
+    let event_id = match id_input() {
+        Some(id) => id,
+        None => return,
+    };
 
     if let Some(event) = planner.find_event_mut(event_id) {
         loop {
-            event.display(event);
-            adjust_menu_options();
+            event.display();
+            adjust_menu();
             match get_choice() {
                 Some(1) => change_name(event),
                 Some(2) => change_start_time(event),
@@ -214,7 +218,6 @@ pub fn adjust_event(planner: Planner) {
         }
     } else {
         println!("Event id {} does not match any events stored", event_id);
-        return;
     }
 }
 
@@ -273,7 +276,7 @@ fn change_end_time(event: &mut Event) {
 }
 
 fn change_reoccurance(event: &mut Event) {
-    println!("Enter new reoccurance option (None, Daily, Weekly, Fornite, Monthly, Yearly): ");
+    println!("Enter new reoccurance option (None, Daily, Weekly, Monthly, Yearly, Fornite): ");
     io::stdout().flush().expect("Failed to flush stdout");
     let mut input = String::new();
     if let Err(e) = io::stdin().read_line(&mut input) {
@@ -293,16 +296,16 @@ fn change_reoccurance(event: &mut Event) {
                event.set_reoccurance(Reoccurance::Weekly);
                println!("Reoccurance updated.");
           },
-          "fornite" => {
-            event.set_reoccurance(Reoccurance::Fornite);
-            println!("Reoccurance updated.");
-          },
           "monthly" => {
                event.set_reoccurance(Reoccurance::Monthly);
                println!("Reoccurance updated.");
           },
           "yearly" => {
                event.set_reoccurance(Reoccurance::Yearly);
+               println!("Reoccurance updated.");
+          },
+          "fornite" => {
+               event.set_reoccurance(Reoccurance::Fornite);
                println!("Reoccurance updated.");
           },
           _ => println!("Unknown reoccurance option."),
@@ -322,16 +325,13 @@ fn change_note(event: &mut Event) {
 }
 
 fn delete_event(planner: &mut Planner, event_id: usize) {
-    // Ask the user to confirm deletion.
     print!("Are you sure you want to delete event ID {}? (y/n):\n> ", event_id);
     io::stdout().flush().expect("Failed to flush stdout");
-
     let mut confirmation = String::new();
     if io::stdin().read_line(&mut confirmation).is_err() {
         println!("Error reading input.");
         return;
     }
-
     match confirmation.trim().to_lowercase().as_str() {
         "y" | "yes" => {
             if let Some(_deleted_event) = planner.delete_event(event_id) {
