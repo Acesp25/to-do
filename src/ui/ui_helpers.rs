@@ -23,6 +23,25 @@ pub fn adjust_menu() {
     println!("      7. Exit");
 }
 
+fn id_input() -> Option<usize>{
+    print!("> ");
+    io::stdout().flush().expect("Failed to flush stdout");
+
+    let mut input = String::new();
+    if let Err(e) = io::stdin().read_line(&mut input) {
+        println!("Error reading input: {}", e);
+        return;
+    }
+
+    match input.trim().parse::<usize>() {
+        Ok(id) => Some(id),
+        Err(_) => {
+            println!("Invalid event ID entered.");
+            None
+        }
+    }
+}
+
 pub fn create_event() {
     // add implementation later
 }
@@ -67,6 +86,60 @@ pub fn adjust_event(planner: Planner) {
     }
 }
 
+fn change_name(event: &mut Event) {
+    print!("Enter new event name: ");
+    io::stdout().flush().expect("Failed to flush stdout");
+    let mut new_name = String::new();
+    if io::stdin().read_line(&mut new_name).is_ok() {
+        event.set_name(new_name.trim().to_string());
+        println!("Event name updated to: {}", event.get_name());
+    } else {
+        println!("Error reading input for name.");
+    }
+}
+
+fn change_start_time(event: &mut Event) {
+    print!("Enter new start time as Unix timestamp: ");
+    io::stdout().flush().expect("Failed to flush stdout");
+    let mut input_ts = String::new();
+    if let Err(e) = io::stdin().read_line(&mut input_ts) {
+        println!("Error reading input: {}", e);
+        return;
+    }
+    match input_ts.trim().parse::<i64>() {
+        Ok(ts) => {
+            if let Some(new_time) = NaiveDateTime::from_timestamp_opt(ts, 0) {
+                event.set_start_time(new_time);
+                println!("Start time updated to: {}", event.get_start_time());
+            } else { 
+                println!("Invalid timestamp entered.");
+            }
+        },
+        Err(_) => println!("Invalid input for start time."),
+    }
+}
+
+fn change_end_time(event: &mut Event) {
+    print!("Enter new end time as Unix timestamp: ");
+    io::stdout().flush().expect("Failed to flush stdout");
+    let mut input_ts = String::new();
+    if let Err(e) = io::stdin().read_line(&mut input_ts) {
+        println!("Error reading input: {}", e);
+        return;
+    }
+    match input_ts.trim().parse::<i64>() {
+        Ok(ts) => {
+            if let Some(new_time) = NaiveDateTime::from_timestamp_opt(ts, 0) {
+                event.set_end_time(new_time);
+                println!("End time updated to: {}", event.get_end_time());
+            } else { 
+                println!("Invalid timestamp entered.");
+            }
+        },
+        Err(_) => println!("Invalid input for end time."),
+    }
+}
+
 fn change_reoccurance(event: &mut Event) {
     println!("Enter new reoccurance option (None, Daily, Weekly, Monthly, Yearly, Fornite): ");
     io::stdout().flush().expect("Failed to flush stdout");
@@ -104,21 +177,14 @@ fn change_reoccurance(event: &mut Event) {
     }
 }
 
-fn id_input() -> Option<usize>{
-    print!("> ");
+fn change_note(event: &mut Event) {
+    print!("Enter new note: ");
     io::stdout().flush().expect("Failed to flush stdout");
-
-    let mut input = String::new();
-    if let Err(e) = io::stdin().read_line(&mut input) {
-        println!("Error reading input: {}", e);
-        return;
+    let mut new_note = String::new();
+    if let Err(e) = io::stdin().read_line(&mut new_note) {
+       println!("Error reading input: {}", e);
+       return;
     }
-
-    match input.trim().parse::<usize>() {
-        Ok(id) => Some(id),
-        Err(_) => {
-            println!("Invalid event ID entered.");
-            None
-        }
-    }
+    event.set_note(new_note.trim().to_string());
+    println!("Note updated.");
 }
