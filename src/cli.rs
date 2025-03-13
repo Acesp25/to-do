@@ -7,3 +7,11 @@ pub fn display_menu() {
     println!("      5. Exit");
 }
 
+pub fn create_event() {
+    // add implementation later
+}
+
+pub fn adjust_menu() {
+    println!("  Select an event to edit! (enter eventID)");
+    
+}
