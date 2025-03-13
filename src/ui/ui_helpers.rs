@@ -20,7 +20,7 @@ pub fn adjust_menu() {
     println!("      4. Change reoccurance");
     println!("      5. Change note");
     println!("      6. Delete event");
-    println!("      7. Exit");
+    println!("      7. Exit event adjustment");
 }
 
 fn id_input() -> Option<usize>{
@@ -54,6 +54,7 @@ pub fn adjust_event(planner: Planner) {
 
     if let Some(event) = planner.find_event_mut(event_id) {
         loop {
+            event.display(event);
             adjust_menu_options();
             print!("> ");
             io::stdout().flush().expect("Failed to flush stdout");
@@ -70,8 +71,8 @@ pub fn adjust_event(planner: Planner) {
                 Ok(4) => change_reoccurance(event),
                 Ok(5) => change_note(event),
                 Ok(6) => {
-                    // Here you could call a planner function to remove the event.
-                    println!("Delete event selected (deletion not implemented here).");
+                    delete_event(planner, event_id);
+                    break;
                 },
                 Ok(7) => {
                     println!("Exiting adjust menu.");
@@ -187,4 +188,27 @@ fn change_note(event: &mut Event) {
     }
     event.set_note(new_note.trim().to_string());
     println!("Note updated.");
+}
+
+fn delete_event(planner: &mut Planner, event_id: usize) {
+    // Ask the user to confirm deletion.
+    print!("Are you sure you want to delete event ID {}? (y/n):\n> ", event_id);
+    io::stdout().flush().expect("Failed to flush stdout");
+
+    let mut confirmation = String::new();
+    if io::stdin().read_line(&mut confirmation).is_err() {
+        println!("Error reading input.");
+        return;
+    }
+
+    match confirmation.trim().to_lowercase().as_str() {
+        "y" | "yes" => {
+            if let Some(_deleted_event) = planner.delete_event(event_id) {
+                println!("Event deleted successfully.");
+            } else {
+                println!("Failed to delete event. Make sure the event ID is valid.");
+            }
+        },
+        _ => println!("Deletion canceled."),
+    }
 }

@@ -4,6 +4,7 @@ use chrono::NaiveDateTime;
 pub struct Planner {
     name: String,
     events: Vec<Event>,
+    event_count: u32
 }
 
 impl Planner {
@@ -11,11 +12,23 @@ impl Planner {
         Self {
             name,
             events: Vec::new(),
+            event_count: 0
         }
     }
 
     pub fn add_event(&mut self, new_event: Event) {
-        self.events.push(event);
+        self.events.push(new_event);
+        self.event_count += 1;
+    }
+
+    pub fn delete_event(&mut self, event_id: usize) -> Option<Event> {
+        if event_id < self.events.len() {
+            Some(self.events.remove(event_id));
+            self.event_count -= 1;
+        } else {
+            println!("Invalid event id {}.", event_id);
+            None
+        }
     }
 
     pub fn list_events(&self) {
