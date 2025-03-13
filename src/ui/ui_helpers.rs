@@ -7,8 +7,7 @@ use crate::backend::enums::priority::Priority;
 use crate::backend::classes::event::Event;
 
 pub fn display_menu(current_date_time: NaiveDateTime) {
-    println!("  Rust To-Do Planner!");
-    println!(" Current date-time: {}", current_date_time);
+    println!("\n\n  Rust To-Do Planner! Current date-time: {}", current_date_time);
     println!("      1. Display today's plans");
     println!("      2. Create an event");
     println!("      3. Adjust an event");
@@ -17,7 +16,7 @@ pub fn display_menu(current_date_time: NaiveDateTime) {
 }
 
 pub fn adjust_menu() {
-    println!("  What would you like to do with this event?");
+    println!("\n  What would you like to do with this event?");
     println!("      1. Change name");
     println!("      2. Change start time");
     println!("      3. Change end time");
