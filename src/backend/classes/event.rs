@@ -1,24 +1,10 @@
 use chrono::NaiveDateTime;
-
-#[derive(Debug, Clone)]
-pub enum Priority {
-    High,
-    Medium,
-    Low,
-}
-
-#[derive(Debug, Clone)]
-pub enum Reoccurance {
-    Yearly,
-    Monthly,
-    Fornite,
-    Weekly,
-    Daily,
-    None,
-}
+use crate::backend::enums::reoccurance::Reoccurance;
+use crate::backend::enums::priority::Priority;
 
 #[derive(Debug, Clone)]
 pub struct Event {
+    id: usize,
     name: String,
     start_time: NaiveDateTime,
     end_time: NaiveDateTime,
@@ -31,6 +17,7 @@ pub struct Event {
 impl Event {
     // Constructor
     pub fn new(
+        id: usize,
         name: String,
         start_time: NaiveDateTime,
         end_time: NaiveDateTime,
@@ -40,6 +27,7 @@ impl Event {
         completed: bool,
     ) -> Self {
         Self {
+            id,
             name,
             start_time,
             end_time,
@@ -53,6 +41,7 @@ impl Event {
     // Helpers
     pub fn display(&self) {
         println!(" __________________________________________");
+        println!("| Event ID: {:<24} |", self.id);
         println!("| Event: {:<30} |", self.name);
         println!("| Start Time: {:<24} |", self.start_time);
         println!("| End Time: {:<24} |", self.end_time);
@@ -64,6 +53,9 @@ impl Event {
     }
 
     // Getters
+    pub fn get_id(&self) -> &usize {
+        &self.id
+    }
     pub fn get_name(&self) -> &String {
         &self.name
     }
