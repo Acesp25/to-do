@@ -4,7 +4,19 @@ use chrono::Local;
 
 pub fn start_ui() {
 
-    let mut planner = Planner::new("Test Planner".to_string());
+    let mut planner = Planner::new("Planner".to_string());
+
+    match planner.load_events_file() {
+        Ok(events) => {
+            for event in events {
+                planner.add_event(event);
+            }
+            println!("Successfully loaded events from file.");
+        }
+        Err(e) => {
+            println!("Error loading events from file: {}", e);
+        }
+    }
 
     loop {
         let current_date_time = Local::now().naive_local();

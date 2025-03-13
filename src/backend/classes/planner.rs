@@ -17,7 +17,7 @@ pub struct Planner {
 
 impl Planner {
     pub fn new(name: String) -> Self {
-        let file_name = format!("{}.txt", name);
+        let file_name = format!("src/planners/{}.txt", name);
         Self {
             name,
             events: Vec::new(),
@@ -36,6 +36,9 @@ impl Planner {
     pub fn delete_event(&mut self, event_id: usize) -> Option<Event> {
         if event_id < self.events.len() {
             self.event_count -= 1;
+            if let Err(e) = self.delete_event_in_file(event_id) {
+                eprintln!("Failed to delete event in file: {}", e);
+            }
             Some(self.events.remove(event_id))
         } else {
             println!("Invalid event id {}.", event_id);
@@ -63,6 +66,9 @@ impl Planner {
             note,
             completed,
         );
+        if let Err(e) = self.append_event_to_file(&event) {
+            eprintln!("Failed to append event to file: {}", e);
+        }
         self.add_event(event);
     }
 
