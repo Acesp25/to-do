@@ -52,6 +52,52 @@ impl Event {
         println!(" __________________________________________");
     }
 
+    pub fn to_string(&self) -> String {
+        // Store the timestamps as i64 integers.
+        format!(
+            "{}|{}|{}|{}|{:?}|{:?}|{}|{}",
+            self.id,
+            self.name,
+            self.start_time.timestamp(),
+            self.end_time.timestamp(),
+            self.priority,
+            self.reoccurance,
+            self.note,
+            self.completed
+        )
+    }
+
+    pub fn from_string(s: &str) -> Option<Event> {
+        let parts: Vec<&str> = s.split('|').collect();
+        if parts.len() != 8 {
+            return None;
+        }
+        let id = parts[0].parse::<usize>().ok()?;
+        let name = parts[1].to_string();
+        let start_ts = parts[2].parse::<i64>().ok()?;
+        let end_ts = parts[3].parse::<i64>().ok()?;
+        let start_time = NaiveDateTime::from_timestamp_opt(start_ts, 0)?;
+        let end_time = NaiveDateTime::from_timestamp_opt(end_ts, 0)?;
+        let priority = match parts[4].to_lowercase().as_str() {
+            "high" => Priority::High,
+            "medium" => Priority::Medium,
+            "low" => Priority::Low,
+            _ => Priority::Medium, // default fallback
+        };
+        let reoccurance = match parts[5].to_lowercase().as_str() {
+            "none" => Reoccurance::None,
+            "daily" => Reoccurance::Daily,
+            "weekly" => Reoccurance::Weekly,
+            "monthly" => Reoccurance::Monthly,
+            "yearly" => Reoccurance::Yearly,
+            "fornite" => Reoccurance::Fornite,
+            _ => Reoccurance::None, // default fallback
+        };
+        let note = parts[6].to_string();
+        let completed = parts[7].parse::<bool>().unwrap_or(false);
+        Some(Event::new(id, name, start_time, end_time, priority, reoccurance, note, completed))
+    }
+
     // Getters
     pub fn get_id(&self) -> &usize {
         &self.id
