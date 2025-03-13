@@ -61,6 +61,23 @@ fn id_input() -> Option<usize> {
     }
 }
 
+pub fn get_unix_timestamp_from_input() -> Option<i64> {
+    let mut input = String::new();
+    if io::stdin().read_line(&mut input).is_err() {
+        println!("Error reading input.");
+        return None;
+    }
+    let input = input.trim();
+
+    match chrono::NaiveDateTime::parse_from_str(input, "%m-%d-%Y %H:%M") {
+        Ok(dt) => Some(dt.timestamp()),
+        Err(e) => {
+            println!("Failed to parse date/time: {}", e);
+            None
+        }
+    }
+}
+
 pub fn event_creater(planner: &mut Planner) {
     // Get event name
     print!("Enter event name: ");
@@ -73,17 +90,12 @@ pub fn event_creater(planner: &mut Planner) {
     let name = name.trim().to_string();
 
     // Get start time
-    print!("Enter start time as Unix timestamp: ");
+    print!("Enter start time (MM-DD-YYYY HH:MM): ");
     io::stdout().flush().expect("Failed to flush stdout");
-    let mut start_input = String::new();
-    if io::stdin().read_line(&mut start_input).is_err() {
-        println!("Error reading start time.");
-        return;
-    }
-    let start_ts = match start_input.trim().parse::<i64>() {
-        Ok(ts) => ts,
-        Err(_) => {
-            println!("Invalid Unix timestamp for start time.");
+    let start_ts = match get_unix_timestamp_from_input() {
+        Some(ts) => ts,
+        None => {
+            println!("Invalid start time input.");
             return;
         }
     };
@@ -96,17 +108,12 @@ pub fn event_creater(planner: &mut Planner) {
     };
 
     // Get end time
-    print!("Enter end time as Unix timestamp: ");
+    print!("Enter end time (MM-DD-YYYY HH:MM): ");
     io::stdout().flush().expect("Failed to flush stdout");
-    let mut end_input = String::new();
-    if io::stdin().read_line(&mut end_input).is_err() {
-        println!("Error reading end time.");
-        return;
-    }
-    let end_ts = match end_input.trim().parse::<i64>() {
-        Ok(ts) => ts,
-        Err(_) => {
-            println!("Invalid Unix timestamp for end time.");
+    let end_ts = match get_unix_timestamp_from_input() {
+        Some(ts) => ts,
+        None => {
+            println!("Invalid end time input.");
             return;
         }
     };
@@ -234,44 +241,42 @@ fn change_name(event: &mut Event) {
 }
 
 fn change_start_time(event: &mut Event) {
-    print!("Enter new start time as Unix timestamp: ");
+    print!("Enter new start time (MM-DD-YYYY HH:MM): ");
     io::stdout().flush().expect("Failed to flush stdout");
-    let mut input_ts = String::new();
-    if let Err(e) = io::stdin().read_line(&mut input_ts) {
-        println!("Error reading input: {}", e);
-        return;
-    }
-    match input_ts.trim().parse::<i64>() {
-        Ok(ts) => {
-            if let Some(new_time) = NaiveDateTime::from_timestamp_opt(ts, 0) {
-                event.set_start_time(new_time);
-                println!("Start time updated to: {}", event.get_start_time());
-            } else { 
-                println!("Invalid timestamp entered.");
-            }
-        },
-        Err(_) => println!("Invalid input for start time."),
+
+    let start_ts = match get_unix_timestamp_from_input() {
+        Some(ts) => ts,
+        None => {
+            println!("Invalid date/time input.");
+            return;
+        }
+    };
+
+    if let Some(new_time) = NaiveDateTime::from_timestamp_opt(start_ts, 0) {
+        event.set_start_time(new_time);
+        println!("Start time updated to: {}", event.get_start_time());
+    } else {
+        println!("Could not create start time from timestamp.");
     }
 }
 
 fn change_end_time(event: &mut Event) {
-    print!("Enter new end time as Unix timestamp: ");
+    print!("Enter new end time (MM-DD-YYYY HH:MM): ");
     io::stdout().flush().expect("Failed to flush stdout");
-    let mut input_ts = String::new();
-    if let Err(e) = io::stdin().read_line(&mut input_ts) {
-        println!("Error reading input: {}", e);
-        return;
-    }
-    match input_ts.trim().parse::<i64>() {
-        Ok(ts) => {
-            if let Some(new_time) = NaiveDateTime::from_timestamp_opt(ts, 0) {
-                event.set_end_time(new_time);
-                println!("End time updated to: {}", event.get_end_time());
-            } else { 
-                println!("Invalid timestamp entered.");
-            }
-        },
-        Err(_) => println!("Invalid input for end time."),
+
+    let end_ts = match get_unix_timestamp_from_input() {
+        Some(ts) => ts,
+        None => {
+            println!("Invalid date/time input.");
+            return;
+        }
+    };
+
+    if let Some(new_time) = NaiveDateTime::from_timestamp_opt(end_ts, 0) {
+        event.set_end_time(new_time);
+        println!("End time updated to: {}", event.get_end_time());
+    } else {
+        println!("Could not create end time from timestamp.");
     }
 }
 
