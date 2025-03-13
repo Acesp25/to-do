@@ -4,6 +4,7 @@ use chrono::NaiveDateTime;
 pub struct Planner {
     name: String,
     events: Vec<Event>,
+    next_event_id: usize,
     event_count: u32
 }
 
@@ -12,12 +13,14 @@ impl Planner {
         Self {
             name,
             events: Vec::new(),
+            next_event_id: 0,
             event_count: 0
         }
     }
 
     pub fn add_event(&mut self, new_event: Event) {
         self.events.push(new_event);
+        self.next_event_id += 1;
         self.event_count += 1;
     }
 
@@ -29,6 +32,29 @@ impl Planner {
             println!("Invalid event id {}.", event_id);
             None
         }
+    }
+
+    pub fn create_event(
+        &mut self,
+        name: String,
+        start_time: NaiveDateTime,
+        end_time: NaiveDateTime,
+        priority: crate::event::Priority,
+        reoccurance: crate::event::Reoccurance,
+        note: String,
+        completed: bool,
+    ) {
+        let event = Event::new(
+            self.next_event_id,
+            name,
+            start_time,
+            end_time,
+            priority,
+            reoccurance,
+            note,
+            completed,
+        );
+        self.add_event(event);
     }
 
     pub fn list_events(&self) {

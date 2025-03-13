@@ -2,6 +2,7 @@ use chrono::NaiveDateTime;
 
 #[derive(Debug, Clone)]
 pub struct Event {
+    id: usize,
     name: String,
     start_time: NaiveDateTime,
     end_time: NaiveDateTime,
@@ -14,6 +15,7 @@ pub struct Event {
 impl Event {
     // Constructor
     pub fn new(
+        id: usize,
         name: String,
         start_time: NaiveDateTime,
         end_time: NaiveDateTime,
@@ -47,6 +49,9 @@ impl Event {
     }
 
     // Getters
+    pub fn get_id(&self) -> usize {
+        &self.id
+    }
     pub fn get_name(&self) -> &String {
         &self.name
     }
