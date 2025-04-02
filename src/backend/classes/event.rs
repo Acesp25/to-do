@@ -1,8 +1,9 @@
 use chrono::NaiveDateTime;
+use serde::{Serialize, Deserialize};
 use crate::backend::enums::reoccurance::Reoccurance;
 use crate::backend::enums::priority::Priority;
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Event {
     id: usize,
     name: String,
@@ -15,7 +16,6 @@ pub struct Event {
 }
 
 impl Event {
-    // Constructor
     pub fn new(
         id: usize,
         name: String,
@@ -26,6 +26,11 @@ impl Event {
         note: String,
         completed: bool,
     ) -> Self {
+        // Validate that end_time is after start_time
+        if end_time < start_time {
+            eprintln!("Warning: End time is before start time");
+        }
+
         Self {
             id,
             name,
@@ -41,15 +46,73 @@ impl Event {
     // Helpers
     pub fn display(&self) {
         println!(" __________________________________________");
-        println!("| Event ID: {:<24} |", self.id);
-        println!("| Event: {:<30} |", self.name);
-        println!("| Start Time: {:<24} |", self.start_time);
-        println!("| End Time: {:<24} |", self.end_time);
-        println!("| Priority: {:<30} |", format!("{:?}", self.priority));
-        println!("| Reoccurance: {:<26} |", format!("{:?}", self.reoccurance));
-        println!("| Note: {:<30} |", self.note);
-        println!("| Completed: {:<27} |", self.completed);
+        println!("| Event ID: {}", self.id);
+        println!("| Event: {}", self.name);
+        println!("| Start Time: {}", self.start_time);
+        println!("| End Time: {}", self.end_time);
+        println!("| Priority: {}", format!("{:?}", self.priority));
+        println!("| Reoccurance: {}", format!("{:?}", self.reoccurance));
+        println!("| Note: {}", self.note);
+        println!("| Completed: {}", self.completed);
         println!(" __________________________________________");
+    }
+
+    pub fn to_string(&self) -> String {
+        format!(
+            "{}|{}|{}|{}|{}|{}|{}|{}",
+            self.id,
+            self.name,
+            self.start_time.format("%Y-%m-%d %H:%M:%S"),
+            self.end_time.format("%Y-%m-%d %H:%M:%S"),
+            format!("{:?}", self.priority),
+            format!("{:?}", self.reoccurance),
+            self.note,
+            self.completed
+        )
+    }
+
+    pub fn from_string(s: &str) -> Option<Event> {
+        let parts: Vec<&str> = s.split('|').collect();
+        if parts.len() != 8 {
+            return None;
+        }
+
+        let id = parts[0].parse::<usize>().ok()?;
+        let name = parts[1].to_string();
+        
+        let start_time = NaiveDateTime::parse_from_str(parts[2], "%Y-%m-%d %H:%M:%S")
+            .map_err(|e| {
+                eprintln!("Error parsing start time: {}", e);
+                e
+            }).ok()?;
+            
+        let end_time = NaiveDateTime::parse_from_str(parts[3], "%Y-%m-%d %H:%M:%S")
+            .map_err(|e| {
+                eprintln!("Error parsing end time: {}", e);
+                e
+            }).ok()?;
+
+        let priority = match parts[4] {
+            "High" => Priority::High,
+            "Medium" => Priority::Medium,
+            "Low" => Priority::Low,
+            _ => Priority::Medium,
+        };
+
+        let reoccurance = match parts[5] {
+            "None" => Reoccurance::None,
+            "Daily" => Reoccurance::Daily,
+            "Weekly" => Reoccurance::Weekly,
+            "Monthly" => Reoccurance::Monthly,
+            "Yearly" => Reoccurance::Yearly,
+            "Fornite" => Reoccurance::Fornite,
+            _ => Reoccurance::None,
+        };
+
+        let note = parts[6].to_string();
+        let completed = parts[7].parse::<bool>().unwrap_or(false);
+
+        Some(Event::new(id, name, start_time, end_time, priority, reoccurance, note, completed))
     }
 
     // Getters

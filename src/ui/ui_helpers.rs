@@ -7,8 +7,7 @@ use crate::backend::enums::priority::Priority;
 use crate::backend::classes::event::Event;
 
 pub fn display_menu(current_date_time: NaiveDateTime) {
-    println!("  Rust To-Do Planner!");
-    println!(" Current date-time: {}", current_date_time);
+    println!("\n\n  Rust To-Do Planner! Current date-time: {}", current_date_time);
     println!("      1. Display today's plans");
     println!("      2. Create an event");
     println!("      3. Adjust an event");
@@ -17,7 +16,7 @@ pub fn display_menu(current_date_time: NaiveDateTime) {
 }
 
 pub fn adjust_menu() {
-    println!("  What would you like to do with this event?");
+    println!("\n  What would you like to do with this event?");
     println!("      1. Change name");
     println!("      2. Change start time");
     println!("      3. Change end time");
@@ -61,7 +60,7 @@ fn id_input() -> Option<usize> {
     }
 }
 
-pub fn get_unix_timestamp_from_input() -> Option<i64> {
+pub fn get_unix_timestamp_from_input() -> Option<NaiveDateTime> {
     let mut input = String::new();
     if io::stdin().read_line(&mut input).is_err() {
         println!("Error reading input.");
@@ -69,8 +68,8 @@ pub fn get_unix_timestamp_from_input() -> Option<i64> {
     }
     let input = input.trim();
 
-    match chrono::NaiveDateTime::parse_from_str(input, "%m-%d-%Y %H:%M") {
-        Ok(dt) => Some(dt.timestamp()),
+    match NaiveDateTime::parse_from_str(input, "%m-%d-%Y %H:%M") {
+        Ok(dt) => Some(dt),
         Err(e) => {
             println!("Failed to parse date/time: {}", e);
             None
@@ -92,17 +91,10 @@ pub fn event_creater(planner: &mut Planner) {
     // Get start time
     print!("Enter start time (MM-DD-YYYY HH:MM): ");
     io::stdout().flush().expect("Failed to flush stdout");
-    let start_ts = match get_unix_timestamp_from_input() {
-        Some(ts) => ts,
-        None => {
-            println!("Invalid start time input.");
-            return;
-        }
-    };
-    let start_time = match NaiveDateTime::from_timestamp_opt(start_ts, 0) {
+    let start_time = match get_unix_timestamp_from_input() {
         Some(time) => time,
         None => {
-            println!("Could not create start time from timestamp.");
+            println!("Invalid start time input.");
             return;
         }
     };
@@ -110,17 +102,10 @@ pub fn event_creater(planner: &mut Planner) {
     // Get end time
     print!("Enter end time (MM-DD-YYYY HH:MM): ");
     io::stdout().flush().expect("Failed to flush stdout");
-    let end_ts = match get_unix_timestamp_from_input() {
-        Some(ts) => ts,
-        None => {
-            println!("Invalid end time input.");
-            return;
-        }
-    };
-    let end_time = match NaiveDateTime::from_timestamp_opt(end_ts, 0) {
+    let end_time = match get_unix_timestamp_from_input() {
         Some(time) => time,
         None => {
-            println!("Could not create end time from timestamp.");
+            println!("Invalid end time input.");
             return;
         }
     };
@@ -174,29 +159,17 @@ pub fn event_creater(planner: &mut Planner) {
     }
     let note = note.trim().to_string();
 
-    // Get completed status
-    print!("Is the event completed? (y/n): ");
-    io::stdout().flush().expect("Failed to flush stdout");
-    let mut comp_input = String::new();
-    if io::stdin().read_line(&mut comp_input).is_err() {
-        println!("Error reading completed status.");
-        return;
-    }
-    let completed = match comp_input.trim().to_lowercase().as_str() {
-        "y" | "yes" => true,
-        _ => false,
-    };
+    let completed = false; // New events are not completed by default
 
-    // Let the planner assign the id automatically, using its create_event method.
+    // Let the planner assign the id automatically, using its create_event method
     planner.create_event(name, start_time, end_time, priority, reoccurance, note, completed);
     println!("Event created successfully and added to the planner.");
 }
 
 pub fn adjust_event(planner: &mut Planner) {
     println!("Select an event to edit! (enter eventID)");
-    planner.list_events(); // call without passing planner
+    planner.list_events();
 
-    // Unwrap the option from id_input
     let event_id = match id_input() {
         Some(id) => id,
         None => return,
@@ -223,6 +196,11 @@ pub fn adjust_event(planner: &mut Planner) {
                 _ => println!("Invalid option, please try again."),
             }
         }
+
+        // Save changes after mutable borrow ends
+        if let Err(e) = planner.save_events_to_file() {
+            println!("Failed to save changes: {}", e);
+        }
     } else {
         println!("Event id {} does not match any events stored", event_id);
     }
@@ -238,25 +216,16 @@ fn change_name(event: &mut Event) {
     } else {
         println!("Error reading input for name.");
     }
+
 }
 
 fn change_start_time(event: &mut Event) {
     print!("Enter new start time (MM-DD-YYYY HH:MM): ");
     io::stdout().flush().expect("Failed to flush stdout");
 
-    let start_ts = match get_unix_timestamp_from_input() {
-        Some(ts) => ts,
-        None => {
-            println!("Invalid date/time input.");
-            return;
-        }
-    };
-
-    if let Some(new_time) = NaiveDateTime::from_timestamp_opt(start_ts, 0) {
+    if let Some(new_time) = get_unix_timestamp_from_input() {
         event.set_start_time(new_time);
         println!("Start time updated to: {}", event.get_start_time());
-    } else {
-        println!("Could not create start time from timestamp.");
     }
 }
 
@@ -264,19 +233,9 @@ fn change_end_time(event: &mut Event) {
     print!("Enter new end time (MM-DD-YYYY HH:MM): ");
     io::stdout().flush().expect("Failed to flush stdout");
 
-    let end_ts = match get_unix_timestamp_from_input() {
-        Some(ts) => ts,
-        None => {
-            println!("Invalid date/time input.");
-            return;
-        }
-    };
-
-    if let Some(new_time) = NaiveDateTime::from_timestamp_opt(end_ts, 0) {
+    if let Some(new_time) = get_unix_timestamp_from_input() {
         event.set_end_time(new_time);
         println!("End time updated to: {}", event.get_end_time());
-    } else {
-        println!("Could not create end time from timestamp.");
     }
 }
 
