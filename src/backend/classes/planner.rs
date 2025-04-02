@@ -134,4 +134,12 @@ impl Planner {
         }
         Ok(())
     }
+    
+    pub fn save_events_to_file(&self) -> io::Result<()> {
+        let mut file = File::create(&self.file_name)?;
+        for event in &self.events {
+            writeln!(file, "{}", event.to_string())?;
+        }
+        Ok(())
+    }
 }
